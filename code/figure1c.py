@@ -13,7 +13,9 @@ from charte_graphique import (
     XLABEL_FONT_SIZE,
     LEGEND_FONT_SIZE, LEGEND_LOC, LEGEND_FRAMEON,
     COLOR_BLUE, COLOR_LIGHT_BLUE,
-    FIGURE_DPI
+    FIGURE_DPI, 
+    TICK_FONT_SIZE, 
+    SOURCE_FONT_SIZE, SOURCE_STYLE, SOURCE_HA
 )
 
 # Lecture des données
@@ -125,7 +127,7 @@ df_stack["delta"] = df_stack["75_plus"] - df_stack["60_74"]
 df_stack["delta"] = df_stack["delta"].clip(lower=0)
 
 
-plt.figure(figsize=(12, 7))
+plt.figure(figsize=(10, 6))
 sns.set_style("whitegrid")
 
 plt.barh(df_stack["indicateur"], df_stack["base_60"], color=COLOR_LIGHT_BLUE, label="60 à 74 ans")
@@ -164,13 +166,22 @@ for i, row in df_stack.iterrows():
 ax = plt.gca()
 ticks = ax.get_xticks()
 ax.set_xticks(ticks)
-ax.set_xticklabels([f"{t * 100:.0f}%" for t in ticks], fontsize=LEGEND_FONT_SIZE)
-ax.tick_params(axis='y', labelsize=LEGEND_FONT_SIZE)
+ax.set_xticklabels([f"{t * 100:.0f}%" for t in ticks], fontsize=TICK_FONT_SIZE)
+ax.tick_params(axis='y', labelsize=TICK_FONT_SIZE)
 
 plt.title("Prévalence des limitations chez les seniors\n et évolution de ces limitations entre 60-74 ans et après 75 ans",
           fontsize=TITLE_FONT_SIZE, weight=TITLE_WEIGHT, loc=TITLE_LOC, pad=15)
 plt.xlabel("Proportion des seniors concernés", fontsize=XLABEL_FONT_SIZE)
 plt.legend(fontsize=LEGEND_FONT_SIZE, frameon=LEGEND_FRAMEON, loc=LEGEND_LOC)
+
+plt.figtext(
+    0,
+    -0.05,
+    "Source des données : DREES - Enquête VQS 2024",
+    ha=SOURCE_HA,
+    fontsize=SOURCE_FONT_SIZE,
+    style=SOURCE_STYLE
+)
 
 plt.tight_layout()
 plt.savefig("./figures/figure1c.png", dpi=FIGURE_DPI, bbox_inches="tight")

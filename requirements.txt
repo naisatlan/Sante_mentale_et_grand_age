@@ -3,5 +3,6 @@ matplotlib
 pandas
 seaborn
 odfpy
-scipy
 zipfile36
+openpyxl
+statsmodels

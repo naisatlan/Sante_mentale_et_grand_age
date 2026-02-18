@@ -9,15 +9,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
-from scipy import stats
 import zipfile
+import seaborn as sns
+from statsmodels.stats.proportion import proportion_confint
 
 from charte_graphique import (
     TITLE_FONT_SIZE, TITLE_WEIGHT, TITLE_LOC,
     XLABEL_FONT_SIZE, YLABEL_FONT_SIZE,
     GRID_COLOR, GRID_LINEWIDTH,
     FIGURE_DPI, 
-    COLOR_BLUE
+    COLOR_BLUE, 
+    TICK_FONT_SIZE, 
+    SOURCE_FONT_SIZE, SOURCE_STYLE, SOURCE_HA
 )
 
 # Colonnes utiles 
@@ -120,22 +123,26 @@ prev_age_plot["age_debut"] = prev_age_plot["cla_age_5"].apply(extraire_age_debut
 # On trie selon cet âge numérique
 prev_age_plot = prev_age_plot.sort_values("age_debut")
 
-# Calcul de l'intervalle de confiance binomial (95%)
-def calculate_binomial_ci(n_success, n_total, confidence=0.95):
-    """Calcule l'intervalle de confiance binomial avec la méthode Wilson"""
+def calculate_binomial_ci(n_success, n_total, confidence=0.99):
     if n_total == 0 or pd.isna(n_success) or pd.isna(n_total):
         return np.nan, np.nan
-    
-    p = n_success / n_total
-    ci_lower, ci_upper = stats.binom.interval(confidence, int(n_total), p)
-    return ci_lower / n_total * 100, ci_upper / n_total * 100
+
+    ci_low, ci_high = proportion_confint(
+        count=n_success,
+        nobs=n_total,
+        alpha=1-confidence,
+        method='wilson'
+    )
+
+    return ci_low * 100, ci_high * 100
 
 prev_age_plot[["ci_lower", "ci_upper"]] = prev_age_plot.apply(
     lambda row: pd.Series(calculate_binomial_ci(row["Ntop_all"], row["Npop_all"])),
     axis=1
 )
 
-fig, ax = plt.subplots(figsize=(10, 5))
+fig, ax = plt.subplots(figsize=(10, 6))
+sns.set_theme(style="whitegrid", context="notebook")
 
 # Zone d'incertitude (intervalle de confiance)
 ax.fill_between(prev_age_plot["age_debut"], 
@@ -156,10 +163,21 @@ ax.set_title(
     f"Part des personnes avec au moins un remboursement \nd'antidépresseur selon l'âge ({ANNEE}, France)",
     fontsize=TITLE_FONT_SIZE, weight=TITLE_WEIGHT, loc=TITLE_LOC
 )
+plt.xticks(fontsize=TICK_FONT_SIZE)
+plt.yticks(fontsize=TICK_FONT_SIZE)
 
 ax.grid(True, which="major", color=GRID_COLOR, linewidth=GRID_LINEWIDTH)
 
 ax.legend(loc='upper left', fontsize=11)
+
+plt.figtext(
+    0,
+    -0.05,
+    "Source des données : CNAM - Effectifs de patients par pathologie 2025",
+    ha=SOURCE_HA,
+    fontsize=SOURCE_FONT_SIZE,
+    style=SOURCE_STYLE
+)
 
 fig.tight_layout()
 plt.savefig("./figures/figure1b.png", dpi=FIGURE_DPI, bbox_inches="tight")

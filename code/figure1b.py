@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import MultipleLocator
 from scipy import stats
+import zipfile
+
 from charte_graphique import (
     TITLE_FONT_SIZE, TITLE_WEIGHT, TITLE_LOC,
     XLABEL_FONT_SIZE, YLABEL_FONT_SIZE,
@@ -28,9 +30,12 @@ usecols = [
   "region", "dept",
   "Npop", "Ntop"
 ]
-
-df = pd.read_csv("./datasets/effectifs.csv", sep=";", dtype=str, usecols=usecols)
-
+try : 
+    df = pd.read_csv("./datasets/effectifs.csv", sep=";", dtype=str, usecols=usecols)
+except Exception as e:
+    with zipfile.ZipFile("./datasets/effectifs.zip", "r") as zip_ref:
+        zip_ref.extractall("./datasets/")
+    df = pd.read_csv("./datasets/effectifs.csv", sep=";", dtype=str, usecols=usecols)
 #Filtrer pour l'année 2023
 df["annee"] = df["annee"].astype(int)
 for col in ["Npop", "Ntop"]:

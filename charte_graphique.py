@@ -20,6 +20,7 @@ TICK_FONT_SIZE = 14
 COLOR_BLUE = "#004e98"
 COLOR_RED = '#d62728'
 COLOR_LIGHT_BLUE = "#a6c8ff"
+COLOR_MAP = "Blues"
 
 # Paramètres de grille
 GRID_COLOR = '0.85'

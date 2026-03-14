@@ -6,3 +6,6 @@ odfpy
 zipfile36
 openpyxl
 statsmodels
+geopandas
+requests
+scikit-learn
